@@ -86,12 +86,12 @@ const Projects = () => {
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/projects', { headers });
+      const res = await axios.get('https://biztrack-production-fc4d.up.railway.app/api/projects', { headers });
       const projectList = res.data;
       setProjects(projectList);
       const counts = {};
       await Promise.all(projectList.map(async (p) => {
-        const taskRes = await axios.get(`http://localhost:5000/api/projects/${p.id}/tasks`, { headers });
+        const taskRes = await axios.get(`https://biztrack-production-fc4d.up.railway.app/api/projects/${p.id}/tasks`, { headers });
         counts[p.id] = { total: taskRes.data.length, done: taskRes.data.filter(t => t.status === 'Done').length };
       }));
       setTaskCounts(counts);
@@ -104,14 +104,14 @@ const Projects = () => {
 
   const fetchClients = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/clients', { headers });
+      const res = await axios.get('https://biztrack-production-fc4d.up.railway.app/api/clients', { headers });
       setClients(res.data);
     } catch (err) { console.error(err); }
   };
 
   const fetchTasks = async (projectId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/projects/${projectId}/tasks`, { headers });
+      const res = await axios.get(`https://biztrack-production-fc4d.up.railway.app/api/projects/${projectId}/tasks`, { headers });
       setTasks(res.data);
     } catch (err) { console.error(err); }
   };
@@ -122,10 +122,10 @@ const Projects = () => {
     e.preventDefault(); setError('');
     try {
       if (editingProject) {
-        await axios.put(`http://localhost:5000/api/projects/${editingProject.id}`, form, { headers });
+        await axios.put(`https://biztrack-production-fc4d.up.railway.app/api/projects/${editingProject.id}`, form, { headers });
         toast.success('Project updated successfully', 'Updated!');
       } else {
-        await axios.post('http://localhost:5000/api/projects', form, { headers });
+        await axios.post('https://biztrack-production-fc4d.up.railway.app/api/projects', form, { headers });
         toast.success('Project created successfully', 'Created!');
       }
       setForm({ client_id: '', title: '', description: '', status: 'Planning', start_date: '', due_date: '' });
@@ -154,7 +154,7 @@ const Projects = () => {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:5000/api/projects/${confirmModal.id}`, { headers });
+      await axios.delete(`https://biztrack-production-fc4d.up.railway.app/api/projects/${confirmModal.id}`, { headers });
       toast.success('Project deleted', 'Deleted');
       if (selectedProject?.id === confirmModal.id) setSelectedProject(null);
       setConfirmModal({ open: false, id: null, name: '' });
@@ -175,7 +175,7 @@ const Projects = () => {
 
   const handleDeleteTask = async () => {
     try {
-      await axios.delete(`http://localhost:5000/api/projects/${selectedProject.id}/tasks/${taskConfirmModal.id}`, { headers });
+      await axios.delete(`https://biztrack-production-fc4d.up.railway.app/api/projects/${selectedProject.id}/tasks/${taskConfirmModal.id}`, { headers });
       toast.success('Task deleted', 'Deleted');
       setTaskConfirmModal({ open: false, id: null, name: '' });
       fetchTasks(selectedProject.id); fetchProjects();
@@ -187,7 +187,7 @@ const Projects = () => {
   const handleAddTask = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`http://localhost:5000/api/projects/${selectedProject.id}/tasks`, taskForm, { headers });
+      await axios.post(`https://biztrack-production-fc4d.up.railway.app/api/projects/${selectedProject.id}/tasks`, taskForm, { headers });
       toast.success('Task added!', 'Created');
       setTaskForm({ title: '', status: 'Pending', assigned_to: '' });
       setShowTaskForm(false); fetchTasks(selectedProject.id); fetchProjects();

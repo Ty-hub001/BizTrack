@@ -43,7 +43,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/auth/profile', { headers });
+        const res = await axios.get('https://biztrack-production-fc4d.up.railway.app/api/auth/profile', { headers });
         setProfile(res.data);
         setNameForm(res.data.name);
       } catch (err) {
@@ -74,7 +74,7 @@ const Profile = () => {
     reader.onloadend = async () => {
       const base64 = reader.result;
       try {
-        await axios.put('http://localhost:5000/api/auth/profile', {
+        await axios.put('https://biztrack-production-fc4d.up.railway.app/api/auth/profile', {
           name: profile.name,
           avatar: base64,
         }, { headers });
@@ -92,7 +92,7 @@ const Profile = () => {
   const handleRemoveAvatar = async () => {
     setAvatarLoading(true);
     try {
-      await axios.put('http://localhost:5000/api/auth/profile', {
+      await axios.put('https://biztrack-production-fc4d.up.railway.app/api/auth/profile', {
         name: profile.name,
         avatar: null,
       }, { headers });
@@ -109,7 +109,7 @@ const Profile = () => {
     e.preventDefault();
     setInfoLoading(true);
     try {
-      await axios.put('http://localhost:5000/api/auth/profile', { name: nameForm, avatar: profile.avatar }, { headers });
+      await axios.put('https://biztrack-production-fc4d.up.railway.app/api/auth/profile', { name: nameForm, avatar: profile.avatar }, { headers });
       setProfile(prev => ({ ...prev, name: nameForm }));
       toast.success('Name updated successfully', 'Updated!');
     } catch (err) {
@@ -131,7 +131,7 @@ const Profile = () => {
     }
     setPasswordLoading(true);
     try {
-      await axios.put('http://localhost:5000/api/auth/profile', {
+      await axios.put('https://biztrack-production-fc4d.up.railway.app/api/auth/profile', {
         name: profile.name,
         avatar: profile.avatar,
         currentPassword: passwordForm.currentPassword,

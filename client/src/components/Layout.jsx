@@ -36,7 +36,7 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     if (!token) return;
-    axios.get('http://localhost:5000/api/auth/profile', {
+    axios.get('https://biztrack-production-fc4d.up.railway.app/api/auth/profile', {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => setProfile(res.data)).catch(() => {});
   }, [token]);

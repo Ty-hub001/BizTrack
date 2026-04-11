@@ -39,7 +39,7 @@ const Clients = () => {
 
   const fetchClients = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/clients', { headers });
+      const res = await axios.get('https://biztrack-production-fc4d.up.railway.app/api/clients', { headers });
       setClients(res.data);
     } catch (err) {
       toast.error('Failed to load clients');
@@ -54,10 +54,10 @@ const Clients = () => {
     e.preventDefault(); setError('');
     try {
       if (editingClient) {
-        await axios.put(`http://localhost:5000/api/clients/${editingClient.id}`, form, { headers });
+        await axios.put(`https://biztrack-production-fc4d.up.railway.app/api/clients/${editingClient.id}`, form, { headers });
         toast.success('Client updated successfully', 'Updated!');
       } else {
-        await axios.post('http://localhost:5000/api/clients', form, { headers });
+        await axios.post('https://biztrack-production-fc4d.up.railway.app/api/clients', form, { headers });
         toast.success('Client added successfully', 'Created!');
       }
       setForm({ name: '', email: '', phone: '', company: '' });
@@ -81,7 +81,7 @@ const Clients = () => {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:5000/api/clients/${confirmModal.id}`, { headers });
+      await axios.delete(`https://biztrack-production-fc4d.up.railway.app/api/clients/${confirmModal.id}`, { headers });
       toast.success('Client deleted', 'Deleted');
       setConfirmModal({ open: false, id: null, name: '' });
       fetchClients();

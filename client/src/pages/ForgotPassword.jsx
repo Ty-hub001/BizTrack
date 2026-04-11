@@ -32,7 +32,7 @@ const ForgotPassword = () => {
     }
 
     try {
-      await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+      await axios.post('https://biztrack-production-fc4d.up.railway.app/api/auth/forgot-password', { email });
       setSuccess(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong');

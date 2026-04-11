@@ -43,7 +43,7 @@ const ResetPassword = () => {
 
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/auth/reset-password', { token, newPassword: password });
+      await axios.post('https://biztrack-production-fc4d.up.railway.app/api/auth/reset-password', { token, newPassword: password });
       setSuccess(true);
       setTimeout(() => navigate('/login'), 3000);
     } catch (err) {

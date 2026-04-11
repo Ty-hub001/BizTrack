@@ -70,9 +70,9 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const [clientsRes, projectsRes, profileRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/clients', { headers }),
-          axios.get('http://localhost:5000/api/projects', { headers }),
-          axios.get('http://localhost:5000/api/auth/profile', { headers }),
+          axios.get('https://biztrack-production-fc4d.up.railway.app/api/clients', { headers }),
+          axios.get('https://biztrack-production-fc4d.up.railway.app/api/projects', { headers }),
+          axios.get('https://biztrack-production-fc4d.up.railway.app/api/auth/profile', { headers }),
         ]);
 
         const clients = clientsRes.data;
@@ -84,7 +84,7 @@ const Dashboard = () => {
         setProjectChartData(Object.entries(statusCount).map(([name, value]) => ({ name, value })));
 
         let pending = 0, inProgress = 0, done = 0;
-        const taskResults = await Promise.all(projects.map(p => axios.get(`http://localhost:5000/api/projects/${p.id}/tasks`, { headers })));
+        const taskResults = await Promise.all(projects.map(p => axios.get(`https://biztrack-production-fc4d.up.railway.app/api/projects/${p.id}/tasks`, { headers })));
         taskResults.forEach(res => {
           res.data.forEach(t => {
             if (t.status === 'Pending') pending++;
