@@ -159,9 +159,7 @@ const Projects = () => {
       if (selectedProject?.id === confirmModal.id) setSelectedProject(null);
       setConfirmModal({ open: false, id: null, name: '' });
       fetchProjects();
-    } catch (err) {
-      toast.error('Failed to delete project', 'Error');
-    }
+    } catch (err) { toast.error('Failed to delete project', 'Error'); }
   };
 
   const handleViewTasks = (project) => {
@@ -179,9 +177,26 @@ const Projects = () => {
       toast.success('Task deleted', 'Deleted');
       setTaskConfirmModal({ open: false, id: null, name: '' });
       fetchTasks(selectedProject.id); fetchProjects();
-    } catch (err) {
-      toast.error('Failed to delete task', 'Error');
-    }
+    } catch (err) { toast.error('Failed to delete task', 'Error'); }
+  };
+
+  const handleUpdateTask = async (task) => {
+    const nextStatus = {
+      'Pending': 'In Progress',
+      'In Progress': 'Done',
+      'Done': 'Pending',
+    };
+    const newStatus = nextStatus[task.status];
+    try {
+      await axios.put(
+        `https://biztrack-production-fc4d.up.railway.app/api/projects/${selectedProject.id}/tasks/${task.id}`,
+        { title: task.title, status: newStatus, assigned_to: task.assigned_to },
+        { headers }
+      );
+      toast.success(`Task marked as ${newStatus}`, 'Updated!');
+      fetchTasks(selectedProject.id);
+      fetchProjects();
+    } catch (err) { toast.error('Failed to update task', 'Error'); }
   };
 
   const handleAddTask = async (e) => {
@@ -247,8 +262,7 @@ const Projects = () => {
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', width: isMobile ? '100%' : 'auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: colors.surface, border: `1.5px solid ${colors.borderMed}`, borderRadius: '10px', padding: '0 14px', flex: isMobile ? 1 : 'none' }}>
             <span style={{ color: colors.textMuted }}>🔍</span>
-            <input
-              style={{ border: 'none', outline: 'none', padding: '10px 0', fontSize: '14px', width: isMobile ? '100%' : '180px', color: colors.text, backgroundColor: 'transparent' }}
+            <input style={{ border: 'none', outline: 'none', padding: '10px 0', fontSize: '14px', width: isMobile ? '100%' : '180px', color: colors.text, backgroundColor: 'transparent' }}
               placeholder="Search projects..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
           <button
@@ -373,7 +387,7 @@ const Projects = () => {
 
           {/* Tasks Panel */}
           {selectedProject && (
-            <div style={{ width: isMobile ? '100%' : '320px', backgroundColor: colors.surface, borderRadius: '16px', padding: '24px', boxShadow: colors.cardShadow, border: `1px solid ${colors.border}`, flexShrink: 0, maxHeight: isMobile ? 'none' : '80vh', overflowY: 'auto' }}>
+            <div style={{ width: isMobile ? '100%' : '340px', backgroundColor: colors.surface, borderRadius: '16px', padding: '24px', boxShadow: colors.cardShadow, border: `1px solid ${colors.border}`, flexShrink: 0, maxHeight: isMobile ? 'none' : '80vh', overflowY: 'auto' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                 <div>
                   <h3 style={{ fontSize: '15px', fontWeight: 700, color: colors.text, margin: '0 0 4px' }}>{selectedProject.title}</h3>
@@ -410,7 +424,13 @@ const Projects = () => {
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {tasks.map(task => (
-                    <TaskItem key={task.id} task={task} onDelete={() => openDeleteTaskModal(task)} colors={colors} />
+                    <TaskItem
+                      key={task.id}
+                      task={task}
+                      onDelete={() => openDeleteTaskModal(task)}
+                      onUpdate={handleUpdateTask}
+                      colors={colors}
+                    />
                   ))}
                 </div>
               )}
@@ -537,20 +557,65 @@ const ProjectRow = ({ project, taskCounts, isSelected, onViewTasks, onEdit, onDe
   );
 };
 
-const TaskItem = ({ task, onDelete, colors }) => {
+const TaskItem = ({ task, onDelete, onUpdate, colors }) => {
   const { hovered, onMouseEnter, onMouseLeave } = useHover();
   const deleteHover = useHover();
+  const updateHover = useHover();
   const tc = taskStatusConfig[task.status] || { bg: '#f1f5f9', color: '#475569' };
+
+  const nextLabel = {
+    'Pending': '▶ Start',
+    'In Progress': '✓ Done',
+    'Done': '↩ Reopen',
+  };
+
+  const nextColor = {
+    'Pending': { bg: '#eff6ff', hbg: '#dbeafe', color: '#3b82f6', hcolor: '#1d4ed8' },
+    'In Progress': { bg: '#d1fae5', hbg: '#a7f3d0', color: '#065f46', hcolor: '#064e3b' },
+    'Done': { bg: '#fef3c7', hbg: '#fde68a', color: '#92400e', hcolor: '#78350f' },
+  };
+
+  const nc = nextColor[task.status];
+
   return (
     <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}
-      style={{ padding: '12px 14px', borderRadius: '10px', backgroundColor: hovered ? colors.surfaceHover : colors.bg, border: `1px solid ${colors.border}`, transform: hovered ? 'translateX(3px)' : 'translateX(0)', transition: 'all 0.2s ease' }}>
+      style={{
+        padding: '12px 14px', borderRadius: '10px',
+        backgroundColor: hovered ? colors.surfaceHover : colors.bg,
+        border: `1px solid ${colors.border}`,
+        transform: hovered ? 'translateX(3px)' : 'translateX(0)',
+        transition: 'all 0.2s ease',
+      }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: colors.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.title}</p>
+          <p style={{
+            margin: 0, fontSize: '14px', fontWeight: 600, color: colors.text,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            textDecoration: task.status === 'Done' ? 'line-through' : 'none',
+            opacity: task.status === 'Done' ? 0.6 : 1,
+          }}>{task.title}</p>
           {task.assigned_to && <p style={{ margin: '3px 0 0', fontSize: '12px', color: colors.textMuted }}>👤 {task.assigned_to}</p>}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }}>
-          <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 600, backgroundColor: tc.bg, color: tc.color, whiteSpace: 'nowrap' }}>{task.status}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '8px' }}>
+          <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 600, backgroundColor: tc.bg, color: tc.color, whiteSpace: 'nowrap' }}>
+            {task.status}
+          </span>
+          <button
+            onClick={() => onUpdate(task)}
+            onMouseEnter={updateHover.onMouseEnter}
+            onMouseLeave={updateHover.onMouseLeave}
+            style={{
+              padding: '4px 10px', borderRadius: '8px', border: 'none',
+              cursor: 'pointer', fontSize: '11px', fontWeight: 600,
+              backgroundColor: updateHover.hovered ? nc.hbg : nc.bg,
+              color: updateHover.hovered ? nc.hcolor : nc.color,
+              whiteSpace: 'nowrap',
+              transform: updateHover.hovered ? 'translateY(-1px)' : 'translateY(0)',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            {nextLabel[task.status]}
+          </button>
           <button onClick={onDelete} onMouseEnter={deleteHover.onMouseEnter} onMouseLeave={deleteHover.onMouseLeave}
             style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: deleteHover.hovered ? '#dc2626' : colors.textMuted, transform: deleteHover.hovered ? 'scale(1.2)' : 'scale(1)', transition: 'all 0.15s ease' }}>✕</button>
         </div>
